@@ -156,8 +156,8 @@ var request = function (opts){
 
 template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
-    //var host = "http://sadira.iasfbo.inaf.it:9999/";
-    var host = "http://localhost:9999/";
+    var host = "http://sadira.iasfbo.inaf.it:9999/";
+    //var host = "http://localhost:9999/";
     
     var ui=tpl_item.ui=ce("div"); 
     ui.innerHTML="Hello db Browser !";
