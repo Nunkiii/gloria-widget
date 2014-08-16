@@ -170,9 +170,10 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
     var detailview;
     var doc_detail_template=tmaster.build_template("img_detail"); 
-    
+    var nb=tpl_item.elements.cnx.elements.bytesread;
+
     var download_progress = function(e){
-	console.log("progress !" + e.loaded);
+	//console.log("progress !" + e.loaded);
 	if (e.lengthComputable) {
 	    var complete = e.loaded /e.total*100.0;
 	    console.log(query + " progress " + complete);
@@ -181,30 +182,39 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    
 	    // Unable to compute progress information since the total size is unknown
 	}
-	//nb.set_value(e.loaded);
+	nb.set_value(e.loaded*1.0);
     }
     
     doc_detail_template.elements.actions.elements.view.onclick=function(){
 	//alert("View image ID " + doc_detail_template.data.autoID);
 	
-	var opts={
+	
+	var op={
 	    host : host,
 	    cmd :  "gloria/get_image",
-	    args: {id : doc_detail_template.data.autoID},
+	    args: {id : doc_detail_template.data.autoID, decode : true},
 	    json : false,
 	    xhr :{ type :  "arraybuffer", progress : download_progress }
 	}
-	var r= new request(opts);
-	var nb=tpl_item.elements.cnx.elements.bytesread;
+	var rq= new request(op);
 
 	nb.set_value(-100);
-	r.execute(function(error, data){
+	rq.execute(function(error, data){
 	    if(error){
 		status.innerHTML+="FITS data query failed : " + error + "<br/>";
 		return;
 	    }
-	    status.innerHTML+="FITS data OK : length " + data.byteLength + "<br/>";
-	    tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
+	
+
+	    status.innerHTML+="FITS data type "+ typeof(data) +" : byteLength " + data.byteLength + " length " + data.length + "<br/>";
+	    //tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
+
+	    
+	    var dgm= new datagram();
+	    dgm.deserialize(data);
+	    
+	    tpl_item.lay.setup_dgram_layer(dgm.header,dgm.data);
+	    //tpl_item.lay.load_fits_data(data);
 	});
     };
 
