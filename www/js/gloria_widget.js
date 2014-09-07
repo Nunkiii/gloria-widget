@@ -333,8 +333,8 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    
 	    var docview = create_ui({ type: "short", root_classes : [] }, doc_template,0 );
 	    doc_template.elements.desc.ui_root.innerHTML="User: " + r.user + "<br/>Target: " + r.target_name + " (" + r.experiment_type + ") <br/>Date: " + r.datein;
-	    doc_template.elements.picture.value="gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg"})));
-											   
+	    doc_template.elements.picture.set_value("http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
+	    
 	    docview.add_class("hscroll_item");
 	    mini_view.ui_childs.add_child(doc_template,docview);
 
