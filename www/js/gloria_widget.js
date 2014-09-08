@@ -30,6 +30,7 @@ var image_db_browser_templates = {
 	    template_name : "geometry",
 	    ui_opts: {
 		sliding: true,
+		slided : false,
 		child_view_type : "div"
 	    }
 	},
@@ -58,6 +59,7 @@ var image_db_browser_templates = {
 		elements : {
 		    status : {name : "Status"},
 		    date : {
+			name : "Date",
 			elements : {
 			    single_date : {
 				name: "Single date", 
@@ -272,7 +274,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	var op={
 	    host : host,
 	    cmd :  "gloria/get_image",
-	    args: {id : doc_detail_template.data.autoID, decode : true},
+	    args: {id : doc_detail_template.data.autoID, type : "jsmat"},
 	    json : false,
 	    xhr :{ type :  "arraybuffer", progress : download_progress }
 	}
@@ -396,7 +398,10 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	}
 	
 	var docview = create_ui({ type: "short", root_classes : [] }, doc_template,0 );
-	doc_template.elements.desc.ui_root.innerHTML="User: " + r.user + "<br/>Target: " + r.target_name + " (" + r.experiment_type + ") <br/>Date: " + r.datein;
+	doc_template.elements.desc.ui_root.innerHTML="User: " + r.user + "<br/>Target: " + r.target_name + " (" + r.experiment_type + ") <br/>Date: " + r.datein + "<br/><a href=\""+
+
+	"http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "fits", id : doc_template.data.autoID }))) + "\"> Download FITS file </a>";
+	
 	doc_template.elements.picture.set_value("http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
 	
 	//docview.add_class("hscroll_item");
