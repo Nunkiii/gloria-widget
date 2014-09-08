@@ -243,6 +243,11 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     var prev=browser.elements.controls.elements.prev_page;
     var next=browser.elements.controls.elements.next_page;
 
+    var page_info=cc("span", browser.elements.controls.ui_childs.div, true);
+
+    
+
+
     var detailview;
     var doc_detail_template=tmaster.build_template("img_detail"); 
     var nb=tpl_item.elements.cnx.elements.bytesread;
@@ -297,15 +302,12 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	
     };
 
-    var request_position=0;
-    var request_size=5;
-    var buffer_size=20;
-
-    
-
-
+    var position=[0,0];
+    var request_size=3;
+    var buffer_size=5;
     var buffer=[];
     var nread_radius=3;
+    var n_query=0;
 
     buffer[0]={ data: null};
     for(var i=1;i<buffer_size;i++){
@@ -316,30 +318,61 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
 
     next.onclick=function(){
-	retrieve_metadata(0, request_size, function(error, data){
+	retrieve_metadata(position[1], request_size, function(error, data){
 	    if(error!=null){
 		status.innerHTML+="Request failed ! " + error + "<br/>";
-		console.log("Request failed ! ");
+		console.log("Request failed ! " + error);
 		return;
 	    }
 	    n_query=data.n;
 	    //console.log("Received " + JSON.stringify(data));
 	    status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
 	    var rows=data.data;
+	    position[1]+=rows.length;
+
+	    var doc_template;
 	    for(var i=0;i<rows.length;i++){
 		var r=rows[i];
 		var doc_template=add_mini_view(r);
-		if(i==0)doc_template.clicked();
+		
 	    }
-	    
+	    doc_template.clicked();
 	});
     }
+
+
+    prev.onclick=function(){
+	var start = (position[0]-request_size <0) ? 0 : (position[0]-request_size);
+	var nr = start + request_size < n_query ? request_size : n_query-start;
+
+	retrieve_metadata(start, nr, function(error, data){
+	    if(error!=null){
+		status.innerHTML+="Request failed ! " + error + "<br/>";
+		console.log("Request failed ! " + error);
+		return;
+	    }
+	    n_query=data.n;
+	    //console.log("Received " + JSON.stringify(data));
+	    //status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
+	    var rows=data.data;
+	    position[0]=start;
+
+	    var doc_template;
+	    for(var i=0;i<rows.length;i++){
+		var r=rows[i];
+		var doc_template=add_mini_view(r,true);
+		
+	    }
+	    doc_template.clicked();
+	});
+    }
+
     
     function retrieve_metadata(start, size, cb){
 	var opts={
 	    host : host,
 	    cmd :  "gloria/query_images",
-	    args :  { from : request_position, to : request_position+request_size-1},
+	    args :  { from : start, to : start+size-1},
 	    json : true,
 	    xhr : { progress : download_progress }
 	};
@@ -348,7 +381,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     };
     
     
-    function add_mini_view(r, row_id){
+    function add_mini_view(r, prep){
 	var doc_template =tmaster.build_template("img_view"); 
 	doc_template.data=r;
 	
@@ -368,25 +401,45 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	
 	//docview.add_class("hscroll_item");
 	
-	mini_view.ui_childs.add_child(doc_template,docview);
-	last_row_id=row_id;
+	mini_view.ui_childs.add_child(doc_template,docview,prep);
+	//last_row_id=row_id;
 	
 	var vl=mini_view.ui_childs.div.children.length;
 	console.log("N mini views =  " + vl );
 
+	if(vl>buffer_size){
+	    var nrem=vl-buffer_size;
+	    for(var r=0;r<nrem;r++){
+		if(prep){
+		    mini_view.ui_childs.div.removeChild(mini_view.ui_childs.div.lastChild); 
+		    position[1]--;
+		}else{
+		    mini_view.ui_childs.div.removeChild(mini_view.ui_childs.div.firstChild); //children.slice(0,vl-buffer_size);
+		    position[0]++;
+		}
+	    }
+	}
+	
+	page_info.innerHTML="View [" + position[0] + ", " + position[1] + "] out of " + n_query;
+
+	vl=mini_view.ui_childs.div.children.length;
+	console.log("N mini views after =  " + vl );
+
 	return doc_template;
     }
     
-    var n_query=0;
 
 
     retrieve_metadata(0, request_size, function(error, data){
 	if(error!=null){
 	    status.innerHTML+="Request failed ! " + error + "<br/>";
-	    console.log("Request failed ! ");
+	    console.log("Request failed ! --> " + error);
 	    return;
 	}
+	
 	n_query=data.n;
+
+	position[1]+=request_size;
 	//console.log("Received " + JSON.stringify(data));
 	status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
 	var rows=data.data;
