@@ -316,7 +316,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
 
     next.onclick=function(){
-	retrieve_metadata(0, request_size, function(error, data{
+	retrieve_metadata(0, request_size, function(error, data){
 	    if(error!=null){
 		status.innerHTML+="Request failed ! " + error + "<br/>";
 		console.log("Request failed ! ");
@@ -332,10 +332,9 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 		if(i==0)doc_template.clicked();
 	    }
 	    
-	}));
-	
+	});
     }
-
+    
     function retrieve_metadata(start, size, cb){
 	var opts={
 	    host : host,
@@ -346,9 +345,8 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	};
 	var r= new request(opts);
 	r.execute(cb);
-	
-    });
-
+    };
+    
     
     function add_mini_view(r, row_id){
 	var doc_template =tmaster.build_template("img_view"); 
@@ -382,7 +380,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     var n_query=0;
 
 
-    retrieve_metadata(0, request_size, function(error, data{
+    retrieve_metadata(0, request_size, function(error, data){
 	if(error!=null){
 	    status.innerHTML+="Request failed ! " + error + "<br/>";
 	    console.log("Request failed ! ");
@@ -398,9 +396,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    if(i==0)doc_template.clicked();
 	}
 
-    }));
-    
-
+    });
     
     return ui;
 }
