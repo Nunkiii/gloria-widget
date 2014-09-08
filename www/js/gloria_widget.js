@@ -96,15 +96,29 @@ var image_db_browser_templates = {
 	    },
 	    browser : {
 		name : "Browse",
-		ui_opts: { root_classes : ["inline"], child_view_type : "div", sliding : true, slided : true},
+		ui_opts: { root_classes : [], child_view_type : "div", sliding : true, slided : true},
 		elements : {
+		    controls : {
+			name : "Controls", 
+			ui_opts : { child_classes : ["inline"]},
+			elements : {
+			    prev_page : {
+				type : "action",
+				name : "<<"
+			    },
+			    next_page : {
+				type : "action",
+				name : ">>"
+			    }
+			}
+		    },
 		    mini_view : {
 			//name : "Browse",
-			ui_opts: { root_classes : ["hscroll"], child_classes : [],child_view_type : "div", sliding : false, slided : true}
+			ui_opts: { root_classes : [], child_classes : ["hscroll"],child_view_type : "div", sliding : false, slided : true}
 		    },
 		    detail_view : {
 			//	 name : "Selected",
-			ui_opts: { root_classes : ["inline"], child_view_type : "div", sliding : false, slided : true},
+			ui_opts: { root_classes : [], child_view_type : "div", sliding : false, slided : true},
 		    }
 		}
 	    }
@@ -218,13 +232,16 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     //var host = "http://localhost:9999/";
     
     var ui=tpl_item.ui=ce("div"); 
-    ui.innerHTML="Hello db Browser !";
+    //ui.innerHTML="Hello db Browser !";
     ui.add_class("image_db_browser");
     
     var status=tpl_item.elements.cnx.ui_root;
     var browser  = tpl_item.elements.browser;
     var mini_view = browser.elements.mini_view;
     var detail_view = browser.elements.detail_view;
+
+    var prev=browser.elements.controls.elements.prev_page;
+    var next=browser.elements.controls.elements.next_page;
 
     var detailview;
     var doc_detail_template=tmaster.build_template("img_detail"); 
@@ -280,19 +297,13 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	
     };
 
-
-
-    var opts={
-	host : host,
-	cmd :  "gloria/query_images",
-	args :  { from : 0, to : 9},
-	json : true,
-	xhr : { progress : download_progress }
-    }
-    
-    var request_position;
+    var request_position=0;
     var request_size=5;
     var buffer_size=20;
+
+    
+
+
     var buffer=[];
     var nread_radius=3;
 
@@ -302,47 +313,94 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     }
     buffer[buffer_size-1].next=buffer[0];
     buffer[0].prev=buffer[buffer_size-1];
-    
-    var r= new request(opts);
-    r.execute(function(error, data){
+
+
+    next.onclick=function(){
+	retrieve_metadata(0, request_size, function(error, data{
+	    if(error!=null){
+		status.innerHTML+="Request failed ! " + error + "<br/>";
+		console.log("Request failed ! ");
+		return;
+	    }
+	    n_query=data.n;
+	    //console.log("Received " + JSON.stringify(data));
+	    status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
+	    var rows=data.data;
+	    for(var i=0;i<rows.length;i++){
+		var r=rows[i];
+		var doc_template=add_mini_view(r);
+		if(i==0)doc_template.clicked();
+	    }
+	    
+	}));
 	
+    }
+
+    function retrieve_metadata(start, size, cb){
+	var opts={
+	    host : host,
+	    cmd :  "gloria/query_images",
+	    args :  { from : request_position, to : request_position+request_size-1},
+	    json : true,
+	    xhr : { progress : download_progress }
+	};
+	var r= new request(opts);
+	r.execute(cb);
+	
+    });
+
+    
+    function add_mini_view(r, row_id){
+	var doc_template =tmaster.build_template("img_view"); 
+	doc_template.data=r;
+	
+	doc_template.clicked=function(){
+	    if(typeof detailview=='undefined'){
+		detailview = create_ui({ type: "short", root_classes : [] }, doc_detail_template,0 );
+		detail_view.ui_childs.add_child(doc_detail_template, detailview);
+	    }
+	    update_template_values(doc_detail_template, this.data);
+	    doc_detail_template.data=this.data;
+	    
+	}
+	
+	var docview = create_ui({ type: "short", root_classes : [] }, doc_template,0 );
+	doc_template.elements.desc.ui_root.innerHTML="User: " + r.user + "<br/>Target: " + r.target_name + " (" + r.experiment_type + ") <br/>Date: " + r.datein;
+	doc_template.elements.picture.set_value("http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
+	
+	//docview.add_class("hscroll_item");
+	
+	mini_view.ui_childs.add_child(doc_template,docview);
+	last_row_id=row_id;
+	
+	var vl=mini_view.ui_childs.div.children.length;
+	console.log("N mini views =  " + vl );
+
+	return doc_template;
+    }
+    
+    var n_query=0;
+
+
+    retrieve_metadata(0, request_size, function(error, data{
 	if(error!=null){
 	    status.innerHTML+="Request failed ! " + error + "<br/>";
 	    console.log("Request failed ! ");
 	    return;
 	}
+	n_query=data.n;
 	//console.log("Received " + JSON.stringify(data));
-	//status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
+	status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
 	var rows=data.data;
 	for(var i=0;i<rows.length;i++){
-
-	    var doc_template =tmaster.build_template("img_view"); 
 	    var r=rows[i];
-
-	    doc_template.data=r;
-
-	    doc_template.clicked=function(){
-		if(typeof detailview=='undefined'){
-		    detailview = create_ui({ type: "short", root_classes : [] }, doc_detail_template,0 );
-		    detail_view.ui_childs.add_child(doc_detail_template, detailview);
-		}
-		update_template_values(doc_detail_template, this.data);
-		doc_detail_template.data=this.data;
-
-	    }
-	    
-	    var docview = create_ui({ type: "short", root_classes : [] }, doc_template,0 );
-	    doc_template.elements.desc.ui_root.innerHTML="User: " + r.user + "<br/>Target: " + r.target_name + " (" + r.experiment_type + ") <br/>Date: " + r.datein;
-	    doc_template.elements.picture.set_value("http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
-	    
-	    docview.add_class("hscroll_item");
-	    mini_view.ui_childs.add_child(doc_template,docview);
-
-
+	    var doc_template=add_mini_view(r);
 	    if(i==0)doc_template.clicked();
 	}
-	
-    });
+
+    }));
+    
+
     
     return ui;
 }

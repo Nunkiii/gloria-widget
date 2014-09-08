@@ -3,7 +3,7 @@ GLORIA-Widget
 
 Image database browser and viewer for the GLORIA project user website.
 
-Work in progress...
+##Demo
 
-
+A demo is visible at http://sadira.iasfbo.inaf.it/gloria-widget/
 
