@@ -57,43 +57,19 @@ var image_db_browser_templates = {
 		ui_opts: { root_classes : ["inline"], child_view_type : "tabbed", sliding : true, slided : false},
 		name : "Select",
 		elements : {
-		    status : {name : "Status"},
-		    date : {
-			name : "Date",
-			elements : {
-			    single_date : {
-				name: "Single date", 
-				type: "date", 
-				value : "2014:12:11", 
-				ui_opts : {editable : true }
-			    },
-			    date_range : {
-				name: "Date range", 
-				type: "labelled_vector", 
-				vector_type : "date",
-				value_labels : ["Start","End"], 
-				value : ["2014:1:1","2015:1:1"], 
-				ui_opts : {editable : true }
-			    }
-			}
-		    },
-		    user : {name: "User"},
-		    observer : {name: "Observer"},		    
-		    reservation_id : {name: "Reservation ID"},
-		    experiment : {name : "Experiment"},
-		    telescop : {name : "Telescope"},
-		    instrument : {name : "Instrument"},
-		    filter : {name : "Filter"},
-		    target_name : {name : "Target name"},
-		    exptime : {name : "Exposure time"},
-		    coord : {
-			name : "Coordinates",
-			type: "labelled_vector", 
-			vector_type : "date",
-			value_labels : ["Ra","Dec"], 
-			value : [0.0,0.0], 
-			ui_opts : {editable : true }
-		    }
+		    status : {name : "Status", db_name : "status", db_type : "string", select : "single"},
+		    date : {name : "Date", db_name : "date", db_type : "date", select : "choice"},
+		    user : {name: "User", db_name : "user", db_type : "string", select : "single"},
+		    observer : {name: "Observer", db_name : "observer", db_type : "string", select : "single"},		    
+		    reservation_id : {name: "Reservation ID", db_name : "reservation_id", db_type : "double", select : "choice"},
+		    experiment : {name : "Experiment", db_name : "experiment", db_type : "string", select : "single"},
+		    telescop : {name : "Telescope", db_name : "telescop", db_type : "string", select : "single"},
+		    instrument : {name : "Instrument", db_name : "instrument", db_type : "string", select : "single"},
+		    filter : {name : "Filter", db_name : "filter", db_type : "string", select : "single"},
+		    target_name : {name : "Target name", db_name : "target_name", db_type : "string", select : "single"},
+		    exptime : {name : "Exposure time", db_name : "exptime", db_type : "double", select : "choice"},
+		    target_ra : {name : "Right ascension", db_name : "target_ra", db_type : "double", select : "choice"},
+		    target_dec : {name : "Declination", db_name : "target_dec", db_type : "double", select : "choice"}
 		},
 	    },
 	    browser : {
@@ -169,6 +145,77 @@ var image_db_browser_templates = {
   
 };
 
+
+function setup_query_template (tpl) {
+    function setup_single(it){
+	var it_tpl=it.tpl={ type : it.db_type};
+	it.select_mode="single";
+	var ui=create_ui({ type: "edit", root_classes : [] }, it_tpl,0 );
+	if(typeof it.sel_ui === 'undefined'){
+	    it.sel_ui=ui;
+	    it.ui_root.appendChild(ui);
+	}else{
+	    it.ui_root.replaceChild(ui,it.sel_ui);
+	    it.sel_ui=ui;
+	}
+
+    }
+
+    function setup_multi(it){
+	var it_tpl=it.tpl={ type: "labelled_vector",  vector_type : it.db_type, value_labels : ["Start","End"], value : [0,0] };
+	var ui=create_ui({ type: "edit", root_classes : [] }, it_tpl,0 );
+	it.select_mode="range";
+
+	if(typeof it.sel_ui === 'undefined'){
+	    it.sel_ui=ui;
+	    it.ui_root.appendChild(ui);
+	}else{
+	    it.ui_root.replaceChild(ui, it.sel_ui);
+	    it.sel_ui=ui;
+	}
+    }
+    
+    for (var field in tpl){
+	var it=tpl[field];
+	//console.log("Field " + field);
+	var sp=cc("span",it.ui_root, true); //cc("span",sp).innerHTML="Enabled : ";
+	var enable_check=it.enabled=cc("input",sp); enable_check.type="checkbox";
+	
+	switch(it.select){
+	case 'single':
+	    setup_single(it);
+	    break;
+	case 'choice':
+	    var selbox=cc("span",it.ui_root); 
+	    var lab=cc("label", selbox); lab.innerHTML="Single";
+	    var single_sel=cc("input",lab); 
+	    single_sel.type="radio";
+	    single_sel.checked="checked";
+	    single_sel.name="sel";
+	    single_sel.it=it;
+
+	    var lab=cc("label", selbox); lab.innerHTML="Range";
+	    var multi_sel=cc("input",lab); 
+	    multi_sel.type="radio"; 
+	    multi_sel.name="sel";
+	    multi_sel.it=it;
+
+	    single_sel.onclick=function(){
+		setup_single(this.it);
+	    }
+	    multi_sel.onclick=function(){
+		setup_multi(this.it);
+	    }
+	    setup_single(it);
+	    break;
+	default:
+	    break;
+	};
+
+    }
+}
+
+
 function update_template_values(tpl, data){
   
   for(var d in data){
@@ -209,22 +256,22 @@ function load_gloria_widget(){
 }
 
 var request = function (opts){
-  //this.opts=opts;
-  this.build_url_string=function(){
-    this.url_string=opts.host+opts.cmd+"?req="+encodeURIComponent(JSON.stringify(opts.args));
-    return this.url_string;
-  }
-  
-  this.execute=function(cb){
-    this.build_url_string();
-    console.log("XHR QUERY");
-    if(opts.json){
-      json_query(this.url_string,cb,opts.xhr);
+    //this.opts=opts;
+    this.build_url_string=function(){
+	this.url_string=opts.host+opts.cmd+"?req="+encodeURIComponent(JSON.stringify(opts.args));
+	return this.url_string;
     }
-    else{
-      xhr_query(this.url_string,cb,opts.xhr);
+    
+    this.execute=function(cb){
+	this.build_url_string();
+	//console.log("XHR QUERY");
+	if(opts.json){
+	    json_query(this.url_string,cb,opts.xhr);
+	}
+	else{
+	    xhr_query(this.url_string,cb,opts.xhr);
+	}
     }
-  }
   return this;
 };
 
@@ -246,9 +293,46 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     var next=browser.elements.controls.elements.next_page;
 
     var page_info=cc("span", browser.elements.controls.ui_childs.div, true);
+    var select = tpl_item.elements.select;
 
+    setup_query_template(select.elements);
     
+    function build_query(){
 
+	var q={};
+	
+	for (var e in select.elements){
+	    var it=select.elements[e]; 
+	    if(it.enabled.checked){
+		console.log(e + " enabled ! mode " + it.select_mode + " V=" + it.tpl.value );
+		switch(it.select_mode){
+		case 'single' : 
+		    q[e]={ single : it.tpl.value};
+		    break;
+		case 'range' :
+		    q[e]={ range : it.tpl.value};
+		    break;
+		default : 
+		    break;
+		};
+	    }
+
+	}
+	
+	console.log("New query is " + JSON.stringify(q));
+	return q;
+    }
+
+
+    var refresh_action={
+	name : "Refresh query",
+	type : "action",
+	onclick :  function(){
+	    reset_metadata();
+	}
+    };
+    var refresh_select=create_ui({ },refresh_action ,0 );
+    select.ui_root.appendChild(refresh_select);
 
     var detailview;
     var doc_detail_template=tmaster.build_template("img_detail"); 
@@ -374,7 +458,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	var opts={
 	    host : host,
 	    cmd :  "gloria/query_images",
-	    args :  { from : start, to : start+size-1},
+	    args :  { from : start, to : start+size-1, query : build_query()},
 	    json : true,
 	    xhr : { progress : download_progress }
 	};
@@ -400,9 +484,9 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	var docview = create_ui({ type: "short", root_classes : [] }, doc_template,0 );
 	doc_template.elements.desc.ui_root.innerHTML="User: " + r.user + "<br/>Target: " + r.target_name + " (" + r.experiment_type + ") <br/>Date: " + r.datein + "<br/><a href=\""+
 
-	"http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "fits", id : doc_template.data.autoID }))) + "\"> Download FITS file </a>";
+	host+"gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "fits", id : doc_template.data.autoID }))) + "\"> Download FITS file </a>";
 	
-	doc_template.elements.picture.set_value("http://sadira.iasfbo.inaf.it:9999/gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
+	doc_template.elements.picture.set_value(host+"gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
 	
 	//docview.add_class("hscroll_item");
 	
@@ -410,7 +494,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	//last_row_id=row_id;
 	
 	var vl=mini_view.ui_childs.div.children.length;
-	console.log("N mini views =  " + vl );
+	//console.log("N mini views =  " + vl );
 
 	if(vl>buffer_size){
 	    var nrem=vl-buffer_size;
@@ -428,33 +512,38 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	page_info.innerHTML="View [" + position[0] + ", " + position[1] + "] out of " + n_query;
 
 	vl=mini_view.ui_childs.div.children.length;
-	console.log("N mini views after =  " + vl );
+	//console.log("N mini views after =  " + vl );
 
 	return doc_template;
     }
     
 
+    function reset_metadata(){
 
-    retrieve_metadata(0, request_size, function(error, data){
-	if(error!=null){
-	    status.innerHTML+="Request failed ! " + error + "<br/>";
-	    console.log("Request failed ! --> " + error);
-	    return;
-	}
-	
-	n_query=data.n;
+	retrieve_metadata(0, request_size, function(error, data){
+	    if(error!=null){
+		status.innerHTML+="Request failed ! " + error + "<br/>";
+		console.log("Request failed ! --> " + error);
+		return;
+	    }
+	    
+	    n_query=data.n;
+	    
+	    position[1]+=request_size;
+	    //console.log("Received " + JSON.stringify(data));
+	    status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
+	    var rows=data.data;
+	    for(var i=0;i<rows.length;i++){
+		var r=rows[i];
+		var doc_template=add_mini_view(r);
+		if(i==0)doc_template.clicked();
+	    }
+	    
+	});
+    }
 
-	position[1]+=request_size;
-	//console.log("Received " + JSON.stringify(data));
-	status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
-	var rows=data.data;
-	for(var i=0;i<rows.length;i++){
-	    var r=rows[i];
-	    var doc_template=add_mini_view(r);
-	    if(i==0)doc_template.clicked();
-	}
+    reset_metadata();
 
-    });
     
     return ui;
 }
