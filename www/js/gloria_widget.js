@@ -47,6 +47,7 @@ var image_db_browser_templates = {
 	elements : {
 	    cnx : { 
 		name : "DB status",
+		type : "text",
 		ui_opts: { root_classes : ["inline"], sliding : true, slided: false},
 		elements : {
 		    bytesread : { name : "Bytes read", type : "bytesize", value : 0},
@@ -284,7 +285,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     //ui.innerHTML="Hello db Browser !";
     ui.add_class("image_db_browser");
     
-    var status=tpl_item.elements.cnx.ui_root;
+    var status=tpl_item.elements.cnx;
     var browser  = tpl_item.elements.browser;
     var mini_view = browser.elements.mini_view;
     var detail_view = browser.elements.detail_view;
@@ -367,15 +368,11 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	nb.set_value(-100);
 	rq.execute(function(error, data){
 	    if(error){
-		status.innerHTML+="FITS data query failed : " + error + "<br/>";
+		status.append("FITS data query failed : " + error + "<br/>");
 		return;
 	    }
-	    
-
-	    status.innerHTML+="FITS data type "+ typeof(data) +" : byteLength " + data.byteLength + " length " + data.length + "<br/>";
+	    status.append("FITS data type "+ typeof(data) +" : byteLength " + data.byteLength + " length " + data.length + "<br/>");
 	    //tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
-
-	    
 	    var dgm= new datagram();
 	    dgm.deserialize(data);
 	    
@@ -406,13 +403,13 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     next.onclick=function(){
 	retrieve_metadata(position[1], request_size, function(error, data){
 	    if(error!=null){
-		status.innerHTML+="Request failed ! " + error + "<br/>";
+		status.append("Request failed ! " + error + "<br/>");
 		console.log("Request failed ! " + error);
 		return;
 	    }
 	    n_query=data.n;
 	    //console.log("Received " + JSON.stringify(data));
-	    status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
+	    status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
 	    var rows=data.data;
 	    position[1]+=rows.length;
 
@@ -433,7 +430,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
 	retrieve_metadata(start, nr, function(error, data){
 	    if(error!=null){
-		status.innerHTML+="Request failed ! " + error + "<br/>";
+		status.append("Request failed ! " + error + "<br/>");
 		console.log("Request failed ! " + error);
 		return;
 	    }
@@ -522,7 +519,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
 	retrieve_metadata(0, request_size, function(error, data){
 	    if(error!=null){
-		status.innerHTML+="Request failed ! " + error + "<br/>";
+		status.append("Request failed ! " + error + "<br/>");
 		console.log("Request failed ! --> " + error);
 		return;
 	    }
@@ -531,7 +528,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    
 	    position[1]+=request_size;
 	    //console.log("Received " + JSON.stringify(data));
-	    status.innerHTML+="Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>";
+	    status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
 	    var rows=data.data;
 	    for(var i=0;i<rows.length;i++){
 		var r=rows[i];
