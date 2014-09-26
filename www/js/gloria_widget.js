@@ -9,6 +9,7 @@ var image_db_browser_templates = {
     type : "template",
     template_name : "image_db_browser",
     
+    
     ui_opts: {root_classes : ["inline"], item_classes : ["inline"], child_classes : ["inline"],  editable : false, 
 	      sliding : false, sliding_dir : "h", slided : true, child_view_type : "bar"},
     //ui_opts: {sliding: true, sliding_dir:"h", root_classes : []},
@@ -16,14 +17,14 @@ var image_db_browser_templates = {
     //     layers : { 
     // 	name: "Layers", 
     elements : {
-      // layer_config : {
-      // 	name : "Image settings",
-      // 	//type : "template",
-      // 	//template_name : "gl_image_layer",
-      // 	ui_opts: {
-      // 	  sliding: true, sliding_dir:"h", slided : true, root_classes : ["inline"], child_classes : ["inline"],child_view_type : "tabbed"
-      // 	}
-	// },
+	layer : {
+      	    name : "Image settings",
+       	    type : "template",
+	    template_name : "gl_image_layer",
+	    ui_opts: {
+	     	sliding: true, sliding_dir:"h", slided : false, root_classes : ["inline"], child_classes : ["inline"],child_view_type : "bar"
+	    }
+	},
 	geometry : {
 	    name : "Image setup",
 	    type : "template",
@@ -39,21 +40,22 @@ var image_db_browser_templates = {
 	
     }
   },
-  
+    
 
     image_db_browser : {
 	name : "DB Browser",
 	tpl_builder : "image_db_browser",
+	events : ["image_data"],
 	elements : {
 	    cnx : { 
 		name : "DB status",
 		type : "text",
 		ui_opts: { root_classes : ["inline"], sliding : true, slided: false},
 		elements : {
-		    bytesread : { name : "Bytes read", type : "bytesize", value : 0},
-		    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0}
 		}
 	    },
+	    bytesread : { name : "Bytes read", type : "bytesize", value : 0},
+	    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0},
 	    select : {
 		ui_opts: { root_classes : ["inline"], child_view_type : "tabbed", sliding : true, slided : false},
 		name : "Select",
@@ -283,9 +285,16 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     
     var ui=tpl_item.ui=ce("div"); 
     //ui.innerHTML="Hello db Browser !";
-    ui.add_class("image_db_browser");
+    //ui.add_class("image_db_browser");
     
     var status=tpl_item.elements.cnx;
+    if(typeof tpl_item.layer==='undefined')
+	tpl_item.layer=tpl_item.parent.parent.parent;
+    var layer=tpl_item.layer;
+    
+    
+    //console.log("imdbbrowser building "+tpl_item.name + " layer " + layer.name);
+
     var browser  = tpl_item.elements.browser;
     var mini_view = browser.elements.mini_view;
     var detail_view = browser.elements.detail_view;
@@ -337,15 +346,15 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
     var detailview;
     var doc_detail_template=tmaster.build_template("img_detail"); 
-    var nb=tpl_item.elements.cnx.elements.bytesread;
+    var nb=tpl_item.elements.bytesread;
 
     var download_progress = function(e){
 	//console.log("progress !" + e.loaded);
 	if (e.lengthComputable) {
 	    var complete = e.loaded /e.total*100.0;
-	    console.log(query + " progress " + complete);
+	    //console.log( " progress % : " + complete);
 	} else {
-	    //console.log(query + " progress unknown bytes read " + xhr.response.length + " loaded " + e.loaded);
+	    //console.log( " progress  loaded " + e.loaded);
 	    
 	    // Unable to compute progress information since the total size is unknown
 	}
@@ -354,8 +363,6 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     
     doc_detail_template.elements.actions.elements.view.onclick=function(){
 	//alert("View image ID " + doc_detail_template.data.autoID);
-	
-	
 	var op={
 	    host : host,
 	    cmd :  "gloria/get_image",
@@ -371,12 +378,13 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 		status.append("FITS data query failed : " + error + "<br/>");
 		return;
 	    }
-	    status.append("FITS data type "+ typeof(data) +" : byteLength " + data.byteLength + " length " + data.length + "<br/>");
+	    //status.append("Downloaded " + data.byteLength + " length " + data.length + "<br/>");
 	    //tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
 	    var dgm= new datagram();
 	    dgm.deserialize(data);
-	    
-	    tpl_item.lay.setup_dgram_layer(dgm.header,dgm.data);
+	    dgm.header.gloria=doc_detail_template.data;
+	    tpl_item.trigger("image_data", dgm);
+	    //layer.setup_dgram_layer(dgm.header,dgm.data);
 	    //tpl_item.lay.load_fits_data(data);
 	});
     };
