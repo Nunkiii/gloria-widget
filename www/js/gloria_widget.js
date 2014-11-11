@@ -2,154 +2,9 @@
 
 //alert("Abraacadabra!");
 
-var image_db_browser_templates = {
-
-  gloria_view :  {
-    name : "GLORIA Widget",
-    type : "template",
-    template_name : "image_db_browser",
-    
-    
-    ui_opts: {root_classes : ["inline"], item_classes : ["inline"], child_classes : ["inline"],  editable : false, 
-	      sliding : false, sliding_dir : "h", slided : true, child_view_type : "bar"},
-    //ui_opts: {sliding: true, sliding_dir:"h", root_classes : []},
-    // elements : {
-    //     layers : { 
-    // 	name: "Layers", 
-    elements : {
-	layer : {
-      	    name : "Image settings",
-       	    type : "template",
-	    template_name : "gl_image_layer",
-	    ui_opts: {
-	     	sliding: true, sliding_dir:"h", slided : false, root_classes : ["inline"], child_classes : ["inline"],child_view_type : "bar"
-	    }
-	},
-	geometry : {
-	    name : "Image setup",
-	    type : "template",
-	    template_name : "geometry",
-	    ui_opts: {
-		sliding: true,
-		slided : false,
-		child_view_type : "div"
-	    }
-	},
-	
-	about : { name : "About", type : "html", url : "about_gloria.html", ui_opts : { sliding : true, sliding_dir : "v", slided : false, root_classes : ["inline"]} }
-	
-    }
-  },
-    
-
-    image_db_browser : {
-	name : "DB Browser",
-	tpl_builder : "image_db_browser",
-	events : ["image_data"],
-	elements : {
-	    cnx : { 
-		name : "DB status",
-		type : "text",
-		ui_opts: { root_classes : ["inline"], sliding : true, slided: false},
-		elements : {
-		}
-	    },
-	    bytesread : { name : "Bytes read", type : "bytesize", value : 0},
-	    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0},
-	    select : {
-		ui_opts: { root_classes : ["inline"], child_view_type : "tabbed", sliding : true, slided : false},
-		name : "Select",
-		elements : {
-		    status : {name : "Status", db_name : "status", db_type : "string", select : "single"},
-		    date : {name : "Date", db_name : "date", db_type : "date", select : "choice"},
-		    user : {name: "User", db_name : "user", db_type : "string", select : "single"},
-		    observer : {name: "Observer", db_name : "observer", db_type : "string", select : "single"},		    
-		    reservation_id : {name: "Reservation ID", db_name : "reservation_id", db_type : "double", select : "choice"},
-		    experiment : {name : "Experiment", db_name : "experiment", db_type : "string", select : "single"},
-		    telescop : {name : "Telescope", db_name : "telescop", db_type : "string", select : "single"},
-		    instrument : {name : "Instrument", db_name : "instrument", db_type : "string", select : "single"},
-		    filter : {name : "Filter", db_name : "filter", db_type : "string", select : "single"},
-		    target_name : {name : "Target name", db_name : "target_name", db_type : "string", select : "single"},
-		    exptime : {name : "Exposure time", db_name : "exptime", db_type : "double", select : "choice"},
-		    target_ra : {name : "Right ascension", db_name : "target_ra", db_type : "double", select : "choice"},
-		    target_dec : {name : "Declination", db_name : "target_dec", db_type : "double", select : "choice"}
-		},
-	    },
-	    browser : {
-		name : "Browse",
-		ui_opts: { root_classes : [], child_view_type : "div", sliding : true, slided : true},
-		elements : {
-		    controls : {
-			name : "Controls", 
-			ui_opts : { child_classes : ["inline"]},
-			elements : {
-			    prev_page : {
-				type : "action",
-				name : "<<"
-			    },
-			    next_page : {
-				type : "action",
-				name : ">>"
-			    }
-			}
-		    },
-		    mini_view : {
-			//name : "Browse",
-			ui_opts: { root_classes : [], child_classes : ["hscroll"],child_view_type : "div", sliding : false, slided : true}
-		    },
-		    detail_view : {
-			//	 name : "Selected",
-			ui_opts: { root_classes : [], child_view_type : "div", sliding : false, slided : true},
-		    }
-		}
-	    }
-	}
-    },
-    
-    img_view : {
-	//name : "ImgView",      
-	ui_opts: { root_classes : ["inline"], child_view_type : "div"},
-	elements : {
-	    picture : {  type: "image_url", ui_opts : {item_classes : ["newline"]}, 
-			 value : "https://avatars3.githubusercontent.com/u/6526387?v=2&s=200" },
-	    desc : {
-		ui_opts: { root_classes : ["newline"], child_view_type : "div"}
-	    } 
-	}
-    },
-    img_detail : {
-    elements : {
-	user : { name : "User", type : "string", ui_opts : {root_classes : ["squeeze","newline"]}},
-	date_obs : {name : "Observation date",type : "date", value : "2014:10:12", ui_opts : {root_classes : ["squeeze","newline"]} },
-	experiment_type : { name : "Experiment type", type: "string", ui_opts : {root_classes : ["squeeze","newline"]} },
-	telescop : { name : "Telescope", type : "string", ui_opts : {root_classes : ["squeeze","newline"]}},
-	exptime : { name : "Exposure time", type : "double", ui_opts : {root_classes : ["squeeze","newline"]}},
-	target_ra : { name : "RA", type : "double", ui_opts : {root_classes : ["squeeze","newline"]}},
-	target_dec : { name : "DEC", type : "double", ui_opts : {root_classes : ["squeeze","newline"]}},
-	
-      actions : {
-	elements : {
-	  view : {
-	    name : "View image",
-	    type : "action"
-	  },
-	  download : {
-	    name : "Download FITS image",
-	    type : "action"
-	  }
-	}
-      }
-    }
-  },
-  
-  img_sumary : {
-    
-  }
-  
-};
-
 
 function setup_query_template (tpl) {
+
     function setup_single(it){
 	var it_tpl=it.tpl={ type : it.db_type};
 	it.select_mode="single";
@@ -162,7 +17,7 @@ function setup_query_template (tpl) {
 	    it.sel_ui=ui;
 	}
 
-    }
+    };
 
     function setup_multi(it){
 	var it_tpl=it.tpl={ type: "labelled_vector",  vector_type : it.db_type, value_labels : ["Start","End"], value : [0,0] };
@@ -179,6 +34,7 @@ function setup_query_template (tpl) {
     }
     
     for (var field in tpl){
+
 	var it=tpl[field];
 	//console.log("Field " + field);
 	var sp=cc("span",it.ui_root, true); //cc("span",sp).innerHTML="Enabled : ";
@@ -251,51 +107,43 @@ function update_template_values(tpl, data){
 "json_params": ""
 */
 
-function load_gloria_widget(){
+//function load_gloria_widget(){
   
-  var xd1 = new xdone();
-  xd1.xdone_init({ server_root : "http://sadira.iasfbo.inaf.it/gloria-widget/XD-1/"});
+//  var xd1 = new xdone();
+//  xd1.xdone_init({ server_root : "http://sadira.iasfbo.inaf.it/gloria-widget/XD-1/"});
   
-}
+//}
 
-var request = function (opts){
-    //this.opts=opts;
-    this.build_url_string=function(){
-	this.url_string=opts.host+opts.cmd+"?req="+encodeURIComponent(JSON.stringify(opts.args));
-	return this.url_string;
-    }
-    
-    this.execute=function(cb){
-	this.build_url_string();
-	//console.log("XHR QUERY");
-	if(opts.json){
-	    json_query(this.url_string,cb,opts.xhr);
-	}
-	else{
-	    xhr_query(this.url_string,cb,opts.xhr);
-	}
-    }
-  return this;
-};
 
 template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
-    var host = "http://sadira.iasfbo.inaf.it:9999/";
-    //var host = "http://localhost:9999/";
+  console.log("GLORIA widget building "+tpl_item.name);
+
+    //var host = "http://sadira.iasfbo.inaf.it/";
+    var host = "http://localhost/";
     
     var ui=tpl_item.ui=ce("div"); 
     //ui.innerHTML="Hello db Browser !";
     //ui.add_class("image_db_browser");
     
+    var layer=tpl_item.elements.layer;
     var status=tpl_item.elements.cnx;
-    if(typeof tpl_item.layer==='undefined')
-	tpl_item.layer=tpl_item.parent.parent.parent;
-    var layer=tpl_item.layer;
-    
-    
-    //console.log("imdbbrowser building "+tpl_item.name + " layer " + layer.name);
 
     var browser  = tpl_item.elements.browser;
+    var submit  = tpl_item.elements.submit;
+    var submit_keys  = submit.elements.keys.elements;
+    
+    submit_keys.telescop.ui_root.add_class("disabled");
+    submit_keys.status.ui_root.add_class("disabled");
+    submit_keys.date.ui_root.add_class("disabled");
+    submit_keys.observer.ui_root.add_class("disabled");
+    submit_keys.instrument.ui_root.add_class("disabled");
+    submit_keys.filter.ui_root.add_class("disabled");
+    submit_keys.target_name.ui_root.add_class("disabled");
+    submit_keys.target_ra.ui_root.add_class("disabled");
+    submit_keys.target_dec.ui_root.add_class("disabled");
+    submit_keys.exptime.ui_root.add_class("disabled");
+
     var mini_view = browser.elements.mini_view;
     var detail_view = browser.elements.detail_view;
 
@@ -303,10 +151,11 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     var next=browser.elements.controls.elements.next_page;
 
     var page_info=cc("span", browser.elements.controls.ui_childs.div, true);
-    var select = tpl_item.elements.select;
 
+    var select = browser.elements.query.elements.select;
     setup_query_template(select.elements);
-    
+    setup_query_template(select.elements);
+
     function build_query(){
 
 	var q={};
@@ -334,6 +183,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     }
 
 
+/*
     var refresh_action={
 	name : "Refresh query",
 	type : "action",
@@ -341,12 +191,14 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    reset_metadata();
 	}
     };
+
     var refresh_select=create_ui({ },refresh_action ,0 );
     select.ui_root.appendChild(refresh_select);
-
+*/
     var detailview;
     var doc_detail_template=tmaster.build_template("img_detail"); 
-    var nb=tpl_item.elements.bytesread;
+    var nb=browser.elements.query.elements.bytesread;
+    var status=browser.elements.query.elements.status;
 
     var download_progress = function(e){
 	//console.log("progress !" + e.loaded);
@@ -358,7 +210,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    
 	    // Unable to compute progress information since the total size is unknown
 	}
-	nb.set_value(e.loaded*1.0);
+       nb.set_value(e.loaded*1.0);
     }
     
     doc_detail_template.elements.actions.elements.view.onclick=function(){
@@ -536,7 +388,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    
 	    position[1]+=request_size;
 	    //console.log("Received " + JSON.stringify(data));
-	    status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
+             status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
 	    var rows=data.data;
 	    for(var i=0;i<rows.length;i++){
 		var r=rows[i];

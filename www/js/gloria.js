@@ -1,64 +1,236 @@
-window.onload = function(){
-    var xd1;
-    var hostname
-    //="ws://192.168.176.103:9999";
-    //="ws://192.168.1.134:9999";
-    ="ws://localhost:9999";
 
-    var xdone_node  = document.getElementById("xdone");
-    var xd1_tpl = tmaster.build_template("gloria_view"); 
 
-    xd1_opts={ html_node : xdone_node, tpl : xd1_tpl, server_root : "XD-1/"};
+var gloria_metadata = function(){};
+
+
+gloria_metadata.prototype= {
+    status : {name : "Status", db_name : "status", type : "string", select : "single"},
+    date : {name : "Date", db_name : "date", type : "date", select : "choice" , value : "2010:03:11", ui_opts : { editable: true}},
+    user : {name: "User", db_name : "user", type : "string", select : "single", value : "Toto", ui_opts : { editable: true}},
+    observer : {name: "Observer", db_name : "observer", type : "string", select : "single", ui_opts : { editable: true}},		    
+    reservation_id : {name: "Reservation ID", db_name : "reservation_id", type : "double", select : "choice", ui_opts : { editable: true}},
+    experiment : {name : "Experiment", db_name : "experiment", type : "string", select : "single", ui_opts : { editable: true}},
+    telescop : {name : "Telescope", db_name : "telescop", type : "string", select : "single", ui_opts : { editable: true}},
+    instrument : {name : "Instrument", db_name : "instrument", type : "string", select : "single", ui_opts : { editable: true}},
+    filter : {name : "Filter", db_name : "filter", type : "string", select : "single", ui_opts : { editable: true}},
+    target_name : {name : "Target name", db_name : "target_name", type : "string", select : "single", ui_opts : { editable: true}},
+    exptime : {name : "Exposure time", db_name : "exptime", type : "double", select : "choice", ui_opts : { editable: true}},
+    target_ra : {name : "Right ascension", db_name : "target_ra", type : "double", select : "choice", ui_opts : { editable: true}},
+    target_dec : {name : "Declination", db_name : "target_dec", type : "double", select : "choice", ui_opts : { editable: true}}
+};
+
+var image_db_browser_templates = {
     
-    xd1_tpl.layer=xd1_tpl.elements.layer;
+    gloria_view :  {
+	//	name : "GLORIA Image DB",
+//		type : "template",
+//		template_name : "image_db_browser",
 
-    xd1= new xdone();
-    xd1.xdone_init(xd1_opts, function(error){
-	
-	if(error!=null){
-	    console.log("Error init XD1 : " + error);
-	    return;
+	//tpl_builder : "image_db_browser",
+	tpl_builder : "image_db_browser",
+	ui_opts: {root_classes : [], item_classes : ["inline"], child_classes : [],  editable : false, 
+		  sliding : false, sliding_dir : "h", slided : true, child_view_type : "tabbed"},
+	//ui_opts: {sliding: true, sliding_dir:"h", root_classes : []},
+	// elements : {
+	//     layers : { 
+	// 	name: "Layers", 
+	elements : {
+
+	    // browser : {
+	    // 	name : "Gloria images browser",
+	    // 	type : "template",
+	    
+	    // 	ui_opts: {
+	    // 	    sliding: true,
+	    // 	    slided : false,
+	    // 	    child_view_type : "div"
+	    // 	}
+	    // },
+
+	    browser : {
+
+		name : "Browse images",
+		ui_opts: { root_classes : [], child_view_type : "bar", sliding : false, slided : false, in_root: false},
+		
+		intro : "Browse the GLORIA Image database",
+
+		elements : {
+		    query : { 
+			name : "Query",
+			ui_opts: { root_classes : [], sliding : true, slided: false, in_root: false, child_view_type : "bar"},
+			elements : {
+
+			    bytesread : { name : "Bytes read", type : "bytesize", value : 0, ui_opts : { root_classes : ["inline"], in_root : false} },
+			    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0, ui_opts : { root_classes : ["inline"], in_root :false}},
+			    status : { name : "Log", type : "text", ui_opts : {root_classes : ["newline"], sliding:true, slided : false} },
+			    select : { name : "Image selection", elements :  new gloria_metadata(), ui_opts : { sliding: true, slided: false, root_classes : ["inline"], in_root : false}},
+			    
+			}
+		    },
+		    controls : {
+			//name : "Controls", 
+			ui_opts : { child_classes : ["inline"], in_root : true, sliding : false, slided : true},
+			elements : {
+			    prev_page : {
+				type : "action",
+				name : "<<"
+			    },
+			    next_page : {
+				type : "action",
+				name : ">>"
+			    }
+			}
+		    },
+		    
+		    mini_view : {
+			//name : "Browse",
+			ui_opts: { root_classes : [], child_classes : ["hscroll"],child_view_type : "div", sliding : false, slided : true, in_root : true}
+		    },
+		    detail_view : {
+			name : "Selected",
+			ui_opts: { root_classes : [], child_view_type : "bar", sliding : true, slided : true, in_root : false},
+			elements : {
+			    gl_viewer : {
+				name : "GL View",
+				type : "template",
+				template_name : "geometry",
+				
+				ui_opts: {
+				    sliding: true,
+				    slided : false,
+				    child_view_type : "div"
+				},
+				
+				elements : {
+				    layer : {
+      					name : "Colors/Levels",
+       					type : "template",
+					template_name : "gl_image_layer",
+					ui_opts: {
+	     				    sliding: true, sliding_dir:"h", slided : false, root_classes : ["inline"], child_classes : ["inline"],child_view_type : "bar"
+					}
+				    }
+				}
+			    },
+			    
+			}
+		    }
+		}
+	    },
+	    submit : {
+		name : "Submit",
+		intro : "Submit a new FITS image to the GLORIA database.",
+		ui_opts : { sliding : false, sliding_dir : "v", slided : true, child_view_type : "bar"},
+		elements : {
+		    source : {
+			name : "FITS Image source",
+			intro : " Choose an image file to import using one of the following sources :",
+			ui_opts : { sliding: true, sliding_animate: false, slided : true, child_view_type : "radio",root_classes : ["inline"]},
+			elements : {
+			    local_file : {
+				name : "Local FITS file",
+				type : "local_file",
+				value : "XXX",
+				intro : "Choose a FITS file on your local filesystem",
+				ui_opts : {type : "edit", editable : true, edited : true}
+			    },
+			    url : {
+				name : "URL to FITS file",
+				type : "url",
+				intro : "Link to a downloadable FITS image file : ",
+				download : true,
+				ui_opts : {type : "edit", editable : true, edited : true}
+			    }
+			}
+		    },
+		    keys : {
+			name : "Gloria Meta-Information", elements :  new gloria_metadata(), 
+			ui_opts : {root_classes : ["inline"], sliding: true, slided : true},
+			intro : "Enter the following required GLORIA keyword fields"
+		    }
+		}
+	    },
+	    about : { 
+		name : "About", type : "html", url : "about_gloria.html", 
+		ui_opts : { sliding : false, sliding_dir : "v", slided : true, root_classes : []} 
+	    }
 	}
-	
-	var gl=xd1.gl;
+    },
     
-	//var layer_opts=tmaster.build_template("gl_image_layer"); 
-	//var lay_ui=create_ui({type:"short" }, layer_opts, 0);
-	
-	
-
-
-	//var lay=new layer(xd1, xd1.nlayers,function(error, l){
+    
+    image_db_browser : {
+	//name : "DB Browser",
+	tpl_builder : "image_db_browser",
+	events : ["image_data"],
+	elements : {
+	    cnx : { 
+		name : "DB status",
+		type : "text",
+		ui_opts: { root_classes : [], sliding : false, slided: true, in_root: false},
+		elements : {
+		    bytesread : { name : "Bytes read", type : "bytesize", value : 0, ui_opts : { in_root : true} },
+		    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0, ui_opts : { in_root : true}},
+		    select : { name : "Image selection", elements :  new gloria_metadata(), ui_opts : { in_root : false}},
+		    
+		}
+	    },
 	    
-	if(error){
-	    console.log("Error ! " + error);
-	    return;
+	
 	}
+    },
+    
+    img_view : {
+	//name : "ImgView",      
+	ui_opts: { root_classes : ["inline"], child_view_type : "div"},
+	elements : {
+	    picture : {  type: "image_url", ui_opts : {item_classes : ["newline"]}, 
+			 value : "https://avatars3.githubusercontent.com/u/6526387?v=2&s=200" },
+	    desc : {
+		ui_opts: { root_classes : ["newline"], child_view_type : "div"}
+	    } 
+	}
+    },
+    img_detail : {
+    elements : {
+	user : { name : "User", type : "string", ui_opts : {root_classes : ["squeeze","newline"]}},
+	date_obs : {name : "Observation date",type : "date", value : "2014:10:12", ui_opts : {root_classes : ["squeeze","newline"]} },
+	experiment_type : { name : "Experiment type", type: "string", ui_opts : {root_classes : ["squeeze","newline"]} },
+	telescop : { name : "Telescope", type : "string", ui_opts : {root_classes : ["squeeze","newline"]}},
+	exptime : { name : "Exposure time", type : "double", ui_opts : {root_classes : ["squeeze","newline"]}},
+	target_ra : { name : "RA", type : "double", ui_opts : {root_classes : ["squeeze","newline"]}},
+	target_dec : { name : "DEC", type : "double", ui_opts : {root_classes : ["squeeze","newline"]}},
 	
-	//xd1_tpl.lay=l;
-	
-	var layer = xd1_tpl.elements.layer;
-	var layer_objects = xd1_tpl.elements.geometry;
-	
-	layer.xd1_attach(xd1, xd1.nlayers);
+      actions : {
+	elements : {
+	  view : {
+	    name : "View image",
+	    type : "action"
+	  },
+	  download : {
+	    name : "Download FITS image",
+	    type : "action"
+	  }
+	}
+      }
+    }
+  },
+  
+  img_sumary : {
+    
+  }
+  
+};
 
-	//layer_opts.container=layer_objects.ui_childs;
-	//layer_objects.ui_childs.add_child(layer_opts.elements.general,layer_opts.elements.general.ui_root);
-	    
+(function(){
+    sadira.listen("ready",function(){
+	console.log("adding gloria templates");
+//    window.addEventListener("load",function(){
+	tmaster.add_templates(image_db_browser_templates);
 
-	xd1.layers[xd1.nlayers]=layer;
-	xd1.layer_enabled[xd1.nlayers]=1;
-	var le_loc=gl.getUniformLocation(xd1.program, "u_layer_enabled");
-	gl.uniform4iv(le_loc, xd1.layer_enabled);
 	
-	xd1.nlayers++;
-	xd1.fullscreen(false);
-	    
-	//	});
+	// var gloria_tpl = tmaster.build_template("gloria_view"); 
+	// gloria_tpl.xdone_node=document.getElementById("xdone");
+	// var gloria_ui = create_ui({},gloria_tpl);
 	
-	
-    });	
-
-
-
-}
+    });
+})();

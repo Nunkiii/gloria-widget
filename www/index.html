@@ -13,7 +13,7 @@
 
   <script src="sadira/js/utils.js"></script>
   <script src="sadira/js/db.js"></script>
-  <script src="gloria-widget/js/gloria_widget.js"></script>
+  <script src="sadira/js/base_templates.js"></script>
   <script src="sadira/js/db_basetypes.js"></script>
   <script src="sadira/js/db_utils.js"></script>
   <script src="sadira/js/datagram.js"></script> 
@@ -25,6 +25,7 @@
 
   <script src="sadira/js/menu.js"></script>
 
+
   <script src="XD-1/js/community/gl-matrix.js"></script>
   <script src="XD-1/js/community/fits.js"></script>
 
@@ -32,37 +33,25 @@
   <script src="XD-1/js/xd1_sbig.js"></script>
   <script src="XD-1/js/xd1_layer.js"></script>
   <script src="XD-1/js/xd1.js"></script>
+
+  <script src="js/gloria_widget.js"></script>
   <script src="js/gloria.js"></script>
+
   
   <style type="text/css"> @import url("sadira/css/db.css"); </style>  
   <style type="text/css"> @import url("XD-1/css/xd1.css"); </style> 
 
-  <script id="shader-fs" type="x-shader/x-fragment">
-
-   precision mediump float;
-   void main(void) {
-     gl_FragColor = vec4(0.8, 1.0, 1.0, 1.0);
-   }
-   
-  </script>
-  
-  <script id="shader-vs" type="x-shader/x-vertex">
-   
-   attribute vec3 aVertexPosition;
-   uniform mat4 uPMatrix;
-   
-   void main(void) {
-     gl_Position = uPMatrix * vec4(aVertexPosition, 1.0);
-   }
-
-  </script>
-
-  <title>XD-1, an experimental WebGL FITS Viewer </title>
+  <title>Gloria project : Image database </title>
 
 </head>
 
-<body>
-  <div id="bg"> </div>
-  <div id="xdone"> </div>
-</body>
+<script>
+ sadira.listen("ready", function(){
+   var gloria=tmaster.build_template("gloria_view");
+   create_ui({},gloria);
+   document.getElementById("gloria").appendChild(gloria.ui_root);
+ });
+</script>
+
+<body id="gloria"></body>
 

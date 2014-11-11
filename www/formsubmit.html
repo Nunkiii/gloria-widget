@@ -1,0 +1,63 @@
+<html>
+  <head><title>POST image interface</title>
+    <style>
+      form {padding: 2em; padding-top: .5em; display: inline-block;}
+      form  textarea { padding: 1em; }
+      form p { background: #ddd; padding: 1em; border-radius: .5em; }
+    </style>
+
+    <script>
+
+     function try_submit_js(){
+
+       var data = new FormData();
+       data.append('json_header', '{"hello" : "world"}');
+       
+       var xhr = new XMLHttpRequest();
+       xhr.open('POST', 'http://sadira.iasfbo.inaf.it:9999/gloria/submit', true);
+       xhr.onload = function () {
+	 // do something to response
+	 console.log(this.responseText);
+       };
+       xhr.send(data);
+     }
+
+    </script>
+
+
+
+  </head>
+<body>
+
+  <h1>FITS DB image POST</h1>
+  <button onclick="try_submit_js();"> Send in JS </button>
+  
+  <h1>Image upload POST interface</h1>
+  
+  <form action="/gloria/submit" enctype="multipart/form-data" method="post">
+    <p><strong>JSON Header :</strong> 
+      <textarea style="vertical-align: top;" name="json_header" cols="50" rows="10" >
+	{
+	"telescop" : "BOOTES-3",
+	"instrume" : "COLORES",
+	"exptime" : "60",
+	"date_obs" : "2014-03-11T12:13:03",
+	"user" : "FAKE_GLORIA_observer",
+	"object" : "M33",
+	"experiment" : "M33 study",
+	"experimentid" : "night",
+	"reservationid" : 1234,
+	"url" : "http://ross.iasfbo.inaf.it/~gloria/test.fits"
+	}
+    </textarea></p>
+    <p><strong>Image File  :</strong><input type="file" name="image_file"></p>
+    <p><input type="submit" value="Send to DB" style="align: right;"></p>
+  </form>
+  
+  <h1>Query database</h1>
+  
+  <a href="http://sadira.iasfbo.inaf.it:9999/gloria/get?type=image/jpeg" > Try query JPEG</a><br>
+  <a href="http://sadira.iasfbo.inaf.it:9999/gloria/get?type=image/fits" > Try query FITS</a>
+  
+</body>
+</html>
