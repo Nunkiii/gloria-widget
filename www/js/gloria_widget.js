@@ -119,8 +119,8 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
   console.log("GLORIA widget building "+tpl_item.name);
 
-    //var host = "http://sadira.iasfbo.inaf.it/";
-    var host = "http://localhost/";
+    var host = "http://sadira.iasfbo.inaf.it/";
+    //var host = "http://localhost/";
     
     var ui=tpl_item.ui=ce("div"); 
     //ui.innerHTML="Hello db Browser !";
