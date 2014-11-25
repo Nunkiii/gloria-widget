@@ -260,7 +260,8 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     buffer[0].prev=buffer[buffer_size-1];
 
 
-    next.onclick=function(){
+    next.listen("click",function(){
+	console.log("NEXT!");
 	retrieve_metadata(position[1], request_size, function(error, data){
 	    if(error!=null){
 		status.append("Request failed ! " + error + "<br/>");
@@ -281,10 +282,10 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    }
 	    doc_template.clicked();
 	});
-    }
+    });
 
 
-    prev.onclick=function(){
+    prev.listen("click",function(){
 	var start = (position[0]-request_size <0) ? 0 : (position[0]-request_size);
 	var nr = start + request_size < n_query ? request_size : n_query-start;
 
@@ -308,7 +309,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    }
 	    doc_template.clicked();
 	});
-    }
+    });
 
     
     function retrieve_metadata(start, size, cb){
@@ -316,7 +317,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    host : host,
 	    cmd :  "gloria/query_images",
 	    args :  { from : start, to : start+size-1, query : build_query()},
-	    json : true,
+	    data_mode : "json",
 	    xhr : { progress : download_progress }
 	};
 	var r= new request(opts);
@@ -343,8 +344,12 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
 	host+"gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "fits", id : doc_template.data.autoID }))) + "\"> Download FITS file </a>";
 	
-	doc_template.elements.picture.set_value(host+"gloria/get_image?req="+encodeURIComponent((JSON.stringify({ type : "jpeg", id : doc_template.data.autoID }))));
-	
+	doc_template.elements.picture.set_value(host+"gloria/get_image?req="+encodeURIComponent(
+	    JSON.stringify(
+		//{ type : "jpeg", id : doc_template.data.autoID }
+		{ type : "custom_jpeg", id : doc_template.data.autoID, size : [256,256] }
+	    )
+	));
 	//docview.add_class("hscroll_item");
 	
 	mini_view.ui_childs.add_child(doc_template,docview,prep);
@@ -387,8 +392,8 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    n_query=data.n;
 	    
 	    position[1]+=request_size;
-	    //console.log("Received " + JSON.stringify(data));
-             status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
+	    console.log("Received " + JSON.stringify(data));
+            //status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
 	    var rows=data.data;
 	    for(var i=0;i<rows.length;i++){
 		var r=rows[i];
