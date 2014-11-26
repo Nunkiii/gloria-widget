@@ -118,8 +118,8 @@ function update_template_values(tpl, data){
 template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
   console.log("GLORIA widget building "+tpl_item.name);
-
-    var host = "http://sadira.iasfbo.inaf.it/";
+    
+    var host = get_server_address() + "/"; // "http://sadira.iasfbo.inaf.it/";
     //var host = "http://localhost/";
     
     var ui=tpl_item.ui=ce("div"); 
@@ -346,7 +346,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	
 	doc_template.elements.picture.set_value(host+"gloria/get_image?req="+encodeURIComponent(
 	    JSON.stringify(
-		//{ type : "jpeg", id : doc_template.data.autoID }
+		//{ type : "jpeg", id : doc_template.data.autoID, redraw : false }
 		{ type : "custom_jpeg", id : doc_template.data.autoID, size : [256,256] }
 	    )
 	));
