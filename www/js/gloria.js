@@ -28,8 +28,8 @@ var image_db_browser_templates = {
 
 	//tpl_builder : "image_db_browser",
 	tpl_builder : "image_db_browser",
-	ui_opts: {root_classes : [], item_classes : ["inline"], child_classes : [],  editable : false, 
-		  sliding : false, sliding_dir : "h", slided : true, child_view_type : "tabbed"},
+	ui_opts: {child_view_type : "tabbed", root : true},
+	
 	//ui_opts: {sliding: true, sliding_dir:"h", root_classes : []},
 	// elements : {
 	//     layers : { 
@@ -50,7 +50,7 @@ var image_db_browser_templates = {
 	    browser : {
 
 		name : "Browse images",
-		ui_opts: { root_classes : [], child_view_type : "bar", sliding : false, slided : false, in_root: false},
+		ui_opts: { root_classes : [], child_view_type : "bar", sliding : false, slided : false, in_root: false, render_name: false},
 		
 		intro : "Browse the GLORIA Image database",
 
@@ -173,9 +173,7 @@ var image_db_browser_templates = {
 		    select : { name : "Image selection", elements :  new gloria_metadata(), ui_opts : { in_root : false}},
 		    
 		}
-	    },
-	    
-	
+	    }
 	}
     },
     
