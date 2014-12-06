@@ -114,24 +114,11 @@ function update_template_values(tpl, data){
   
 //}
 
+template_ui_builders.gloria_submit=function(ui_opts, submit){
 
-template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
-
-  console.log("GLORIA widget building "+tpl_item.name);
-    
-    var host = get_server_address() + "/"; // "http://sadira.iasfbo.inaf.it/";
-    //var host = "http://localhost/";
-    
-    var ui=tpl_item.ui=ce("div"); 
-    //ui.innerHTML="Hello db Browser !";
-    //ui.add_class("image_db_browser");
-    
-    var layer=tpl_item.elements.layer;
-    var status=tpl_item.elements.cnx;
-
-    var browser  = tpl_item.elements.browser;
-    var submit  = tpl_item.elements.submit;
     var submit_keys  = submit.elements.keys.elements;
+
+    console.log("submit " + submit.name + " keys " + submit_keys  );
     
     submit_keys.telescop.ui_root.add_class("disabled");
     submit_keys.status.ui_root.add_class("disabled");
@@ -143,6 +130,26 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     submit_keys.target_ra.ui_root.add_class("disabled");
     submit_keys.target_dec.ui_root.add_class("disabled");
     submit_keys.exptime.ui_root.add_class("disabled");
+    
+}
+
+
+template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
+
+  console.log("gloria DB browser building :  "+tpl_item.name);
+    
+    var host = get_server_address() + "/"; // "http://sadira.iasfbo.inaf.it/";
+    //var host = "http://localhost/";
+    
+    var ui=tpl_item.ui=ce("div"); 
+    //ui.innerHTML="Hello db Browser !";
+    //ui.add_class("image_db_browser");
+    
+    //var layer=tpl_item.elements.layer;
+    var status=tpl_item.elements.cnx;
+
+    var browser  = tpl_item; //.elements.browser;
+
 
     var mini_view = browser.elements.mini_view;
     var detail_view = browser.elements.detail_view;
