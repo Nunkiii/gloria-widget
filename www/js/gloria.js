@@ -20,29 +20,81 @@ gloria_metadata.prototype= {
 };
 
 var image_db_browser_templates = {
+
+    gloria : {
+	//name : "GLORIA Images",
+	tpl_builder : "gloria",
+	ui_opts : { child_view_type : "divider", root : true},
+	elements : {
+	    db :{
+		name : "GLORIA Image DB",
+		//type : "string", value : "Hello DB !"
+		type : "template",template_name : "gloria_view"
+		
+	    },
+	    glwidget : {
+		//name : "Gloria Widget",
+		ui_opts : { child_view_type : "divider", divdir : true},
+		type : "string", value : "Hello widget !",
+	    	elements : {
+	    	    glm : {
+	    		//name : "GL View setup",
+	    		type : "template",
+	    		template_name : "gl_multilayer",
+			server_root : "XD-1/",
+	    		ui_opts: {
+	    		    sliding: false,
+	    		    slided : false,
+	    		    child_view_type : "tabbed",
+			    render_name : false
+			    
+	    		},
+			
+	    		// elements : {
+	    		//     levels : {
+       	    		// 	type : "template",
+	    		// 	template_name : "levelconf",
+	    		// 	ui_opts: {
+	     		// 	    //root_classes : ["inline"], child_classes : ["inline"],child_view_type : "bar"
+	    		// 	}
+	    		//     }
+	    		// }
+	    	    },	
+	    	    screen : {
+	    		name : "GL Screen"
+	    		//type : "glscreen"
+	    	    }
+		    
+	    	}
+	    }
+	}
+    },
     
     gloria_view :  {
-	//	name : "GLORIA Image DB",
+	name : "GLORIA Image DB",
 //		type : "template",
-	ui_opts: {child_view_type : "tabbed", root : true},
+	ui_opts: {child_view_type : "tabbed"},
 	elements : {
 	    browser : {
-		name : "Browse images",
-		ui_opts: { root_classes : [], child_view_type : "div", render_name: false},
-		intro : "Browse the GLORIA Image database",
-		type : "template",
-		template_name : "image_db_browser",
+	    	name : "Browse images",
+	    	ui_opts: { root_classes : [], child_view_type : "div", render_name: false},
+	    	intro : "Browse the GLORIA Image database",
+	    	type : "template",
+	    	template_name : "image_db_browser",
 	    },
 	    submit : {
 		name : "Submit",
 		intro : "Submit a new FITS image to the GLORIA database.",
 		tpl_builder : "gloria_submit",
-		ui_opts : { sliding : false, sliding_dir : "v", slided : true, child_view_type : "bar"},
+		ui_opts : { sliding : false, sliding_dir : "v", slided : true, child_view_type : "div", render_name : false},
 		elements : {
 		    source : {
 			name : "FITS Image source",
 			intro : " Choose an image file to import using one of the following sources :",
-			ui_opts : { sliding: true, sliding_animate: false, slided : true, child_view_type : "radio",root_classes : ["inline"]},
+			ui_opts : {
+			    sliding: true, sliding_animate: false, slided : true, child_view_type : "radio",root_classes : ["inline"],
+			    in_root : false
+			},
 			elements : {
 			    local_file : {
 				name : "Local FITS file",
@@ -82,29 +134,30 @@ var image_db_browser_templates = {
 	    cnx : { 
 		name : "DB status",
 		type : "text",
-		ui_opts: { root_classes : [], sliding : false, slided: true, in_root: false},
+		ui_opts: { root_classes : ["disabled"], sliding : false, slided: true, in_root: false},
 		elements : {
 		    bytesread : { name : "Bytes read", type : "bytesize", value : 0, ui_opts : { in_root : true} },
 		    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0, ui_opts : { in_root : true}},
-		    select : { name : "Image selection", elements :  new gloria_metadata(), ui_opts : { in_root : false}},
+		    //select : { name : "Image selection", elements :  new gloria_metadata(), ui_opts : { in_root : false}},
 		    
 		}
 	    },
 	    query : { 
 		name : "Query",
-		ui_opts: { root_classes : [], sliding : true, slided: false, in_root: false, child_view_type : "tabbed"},
+		ui_opts: { root_classes : ["disabled"], sliding : true, slided: false, in_root: false, child_view_type : "tabbed"},
 		elements : {
 		    
 		    bytesread : { name : "Bytes read", type : "bytesize", value : 0, ui_opts : { root_classes : ["inline"], in_root : false} },
 		    nrecords : { name : "Selected records", type : "double", min : 0, step : 1, value : 0, ui_opts : { root_classes : ["inline"], in_root :false}},
 		    status : { name : "Log", type : "text", ui_opts : {root_classes : ["newline"], sliding:true, slided : false} },
+
 		    select : { name : "Image selection", elements :  new gloria_metadata(), ui_opts : { sliding: true, slided: false, root_classes : ["inline"], in_root : false}},
 		    
 		}
 	    },
 	    controls : {
 		//name : "Controls", 
-		ui_opts : { child_classes : [], in_root : true, sliding : false, slided : true},
+		ui_opts : { root_classes : ["newline"], in_root : true, sliding : false, slided : true},
 		elements : {
 		    prev_page : {
 			type : "action",
@@ -120,48 +173,32 @@ var image_db_browser_templates = {
 	    mini_view : {
 		//name : "Browse",
 		ui_opts: { root_classes : [], child_classes : ["hscroll"],child_view_type : "div", sliding : false, slided : true, in_root : true}
-	    },
+	    }
+	    /*,
 	    detail_view : {
 		name : "Selected",
 		ui_opts: { root_classes : [], child_view_type : "bar", sliding : true, slided : true, in_root : false},
 		elements : {
-		    gl_viewer : {
-			name : "GL View",
-			type : "template",
-			template_name : "geometry",
-			
-			ui_opts: {
-			    //sliding: true,
-			    //slided : false,
-			    child_view_type : "div"
-			},
-			
-			elements : {
-			    layer : {
-      				name : "Colors/Levels",
-       				type : "template",
-				template_name : "gl_image_layer",
-				ui_opts: {
-	     			    sliding: true, sliding_dir:"h", slided : false, root_classes : ["inline"], child_classes : ["inline"],child_view_type : "bar"
-				}
-			    }
-			}
-		    },
-		    
+	    
 		}
-	    }
+	    }*/
 	}
     },
     
     img_view : {
 	//name : "ImgView",      
-	ui_opts: { root_classes : ["inline"], child_view_type : "div"},
+	ui_opts: { root_classes : [], child_view_type : "div"},
 	elements : {
 	    picture : {  type: "image_url", ui_opts : {item_classes : ["newline"]}, 
 			 value : "https://avatars3.githubusercontent.com/u/6526387?v=2&s=200" },
 	    desc : {
 		ui_opts: { root_classes : ["newline"], child_view_type : "div"}
-	    } 
+	    },
+	    
+	    glview : {
+		type : "action",
+		name : "GL View"
+	    }
 	}
     },
     img_detail : {

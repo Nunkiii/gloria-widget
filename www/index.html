@@ -46,9 +46,10 @@
 
 <script>
  sadira.listen("ready", function(){
-   var gloria=tmaster.build_template("gloria_view");
+   var gloria=tmaster.build_template("gloria");
    create_ui({},gloria);
    attach_ui(gloria, document.body);
+   gloria.trigger("view_update");
  });
 </script>
 

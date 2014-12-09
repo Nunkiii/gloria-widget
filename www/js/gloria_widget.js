@@ -114,6 +114,21 @@ function update_template_values(tpl, data){
   
 //}
 
+template_ui_builders.gloria=function(ui_opts, gloria){
+
+
+    console.log("GLORIA Build....");
+    var glwidget = gloria.elements.glwidget;
+    var glm = glwidget.elements.glm;
+    var screen = glwidget.elements.screen;
+
+    var drawing_node=cc("div", screen.ui_root);
+    drawing_node.add_class("drawing_node");
+    glm.set_drawing_node(drawing_node);
+}
+
+
+
 template_ui_builders.gloria_submit=function(ui_opts, submit){
 
     var submit_keys  = submit.elements.keys.elements;
