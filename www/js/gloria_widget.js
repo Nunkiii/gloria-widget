@@ -125,6 +125,10 @@ template_ui_builders.gloria=function(ui_opts, gloria){
     var drawing_node=cc("div", screen.ui_root);
     drawing_node.add_class("drawing_node");
     glm.set_drawing_node(drawing_node);
+
+    var browser = gloria.elements.db.elements.browser;
+    browser.glm=glm;
+    
 }
 
 
@@ -226,39 +230,46 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	//console.log("progress !" + e.loaded);
 	if (e.lengthComputable) {
 	    var complete = e.loaded /e.total*100.0;
-	    //console.log( " progress % : " + complete);
+	    console.log( " progress % : " + complete);
 	} else {
-	    //console.log( " progress  loaded " + e.loaded);
+	    console.log( " progress  loaded " + e.loaded);
 	    
 	    // Unable to compute progress information since the total size is unknown
 	}
-       nb.set_value(e.loaded*1.0);
+       //nb.set_value(e.loaded*1.0);
     }
     
-    doc_detail_template.elements.actions.elements.view.onclick=function(){
+    //doc_detail_template.elements.actions.elements.view.onclick= id : doc_detail_template.data.autoID
+    function load_image_data(id){
 	//alert("View image ID " + doc_detail_template.data.autoID);
 	var op={
 	    host : host,
 	    cmd :  "gloria/get_image",
-	    args: {id : doc_detail_template.data.autoID, type : "jsmat"},
-	    json : false,
+	    args: {id : id, type : "jsmat"},
+	    data_mode : "dgm",
 	    xhr :{ type :  "arraybuffer", progress : download_progress }
 	}
 	var rq= new request(op);
 
-	nb.set_value(-100);
-	rq.execute(function(error, data){
+	//nb.set_value(-100);
+	rq.execute(function(error, dgm){
 	    if(error){
-		status.append("FITS data query failed : " + error + "<br/>");
+		console.log("FITS data query failed : " + error);
 		return;
 	    }
 	    //status.append("Downloaded " + data.byteLength + " length " + data.length + "<br/>");
 	    //tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
-	    var dgm= new datagram();
-	    dgm.deserialize(data);
+
 	    dgm.header.gloria=doc_detail_template.data;
 	    tpl_item.trigger("image_data", dgm);
-	    //layer.setup_dgram_layer(dgm.header,dgm.data);
+	    
+	    var img =tmaster.build_template("image"); //for(var u in img) console.log("ip " + u);
+	    //template_ui_builders.image({},img);
+	    create_ui({}, img);
+	    for(var u in img) console.log("ip " + u);
+	    img.setup_dgram_image(dgm.header,dgm.data);
+	    browser.glm.create_layer(img);
+	    
 	    //tpl_item.lay.load_fits_data(data);
 	});
     };
@@ -353,11 +364,11 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	
 	doc_template.clicked=function(){
 	    if(typeof detailview=='undefined'){
-		detailview = create_ui({ type: "short", root_classes : [] }, doc_detail_template,0 );
-		detail_view.ui_childs.add_child(doc_detail_template, detailview);
+//		detailview = create_ui({ type: "short", root_classes : [] }, doc_detail_template,0 );
+		//		detailview.ui_childs.add_child(doc_detail_template, detailview);
 	    }
-	    update_template_values(doc_detail_template, this.data);
-	    doc_detail_template.data=this.data;
+	    //update_template_values(doc_detail_template, this.data);
+	    //doc_detail_template.data=this.data;
 	    
 	}
 	
@@ -372,6 +383,14 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 		{ type : "custom_jpeg", id : doc_template.data.autoID, size : [256,256] }
 	    )
 	));
+
+	doc_template.elements.glview.listen("click", function(){
+	    var id=doc_template.data.autoID;
+	    console.log("Loading image data ... "+ id);
+	    load_image_data(id);
+	});
+
+	
 	//docview.add_class("hscroll_item");
 	
 	mini_view.ui_childs.add_child(doc_template,docview,prep);

@@ -35,7 +35,7 @@ var image_db_browser_templates = {
 	    glwidget : {
 		//name : "Gloria Widget",
 		ui_opts : { child_view_type : "divider", divdir : true},
-		type : "string", value : "Hello widget !",
+		//type : "string", value : "Hello widget !",
 	    	elements : {
 	    	    glm : {
 	    		//name : "GL View setup",
@@ -61,7 +61,7 @@ var image_db_browser_templates = {
 	    		// }
 	    	    },	
 	    	    screen : {
-	    		name : "GL Screen"
+	    		//name : "GL Screen"
 	    		//type : "glscreen"
 	    	    }
 		    
