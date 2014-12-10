@@ -166,7 +166,6 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     
     //var layer=tpl_item.elements.layer;
     var status=tpl_item.elements.cnx;
-
     var browser  = tpl_item; //.elements.browser;
 
 
@@ -226,53 +225,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
     var nb=browser.elements.query.elements.bytesread;
     var status=browser.elements.query.elements.status;
 
-    var download_progress = function(e){
-	//console.log("progress !" + e.loaded);
-	if (e.lengthComputable) {
-	    var complete = e.loaded /e.total*100.0;
-	    console.log( " progress % : " + complete);
-	} else {
-	    console.log( " progress  loaded " + e.loaded);
-	    
-	    // Unable to compute progress information since the total size is unknown
-	}
-       //nb.set_value(e.loaded*1.0);
-    }
     
-    //doc_detail_template.elements.actions.elements.view.onclick= id : doc_detail_template.data.autoID
-    function load_image_data(id){
-	//alert("View image ID " + doc_detail_template.data.autoID);
-	var op={
-	    host : host,
-	    cmd :  "gloria/get_image",
-	    args: {id : id, type : "jsmat"},
-	    data_mode : "dgm",
-	    xhr :{ type :  "arraybuffer", progress : download_progress }
-	}
-	var rq= new request(op);
-
-	//nb.set_value(-100);
-	rq.execute(function(error, dgm){
-	    if(error){
-		console.log("FITS data query failed : " + error);
-		return;
-	    }
-	    //status.append("Downloaded " + data.byteLength + " length " + data.length + "<br/>");
-	    //tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
-
-	    dgm.header.gloria=doc_detail_template.data;
-	    tpl_item.trigger("image_data", dgm);
-	    
-	    var img =tmaster.build_template("image"); //for(var u in img) console.log("ip " + u);
-	    //template_ui_builders.image({},img);
-	    create_ui({}, img);
-	    for(var u in img) console.log("ip " + u);
-	    img.setup_dgram_image(dgm.header,dgm.data);
-	    browser.glm.create_layer(img);
-	    
-	    //tpl_item.lay.load_fits_data(data);
-	});
-    };
 
     doc_detail_template.elements.actions.elements.download.onclick=function(){
 	
@@ -351,7 +304,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    cmd :  "gloria/query_images",
 	    args :  { from : start, to : start+size-1, query : build_query()},
 	    data_mode : "json",
-	    xhr : { progress : download_progress }
+	    xhr : {} // progress : download_progress }
 	};
 	var r= new request(opts);
 	r.execute(cb);
@@ -387,9 +340,72 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	doc_template.elements.glview.listen("click", function(){
 	    var id=doc_template.data.autoID;
 	    console.log("Loading image data ... "+ id);
+
+	    var glb=this;
+
+	    glb.disable(true);
+	        //doc_detail_template.elements.actions.elements.view.onclick= id : doc_detail_template.data.autoID
+	    function load_image_data(id){
+		var dmon=doc_template.elements.glview.dmon;
+		//alert("View image ID " + doc_detail_template.data.autoID);
+		if(ù(dmon)){
+		    dmon=doc_template.elements.glview.dmon=new proc_monitor();
+		    doc_template.ui_childs.div.appendChild(dmon.ui);
+		}
+
+		var download_progress = function(e){
+		    //console.log("progress !" + e.loaded);
+		    if (e.lengthComputable) {
+			var complete = e.loaded /e.total;
+			dmon.progress(complete, "Image data : " + Math.floor(complete*100)+" % loaded");
+		    } else {
+			dmon.message("Loaded bytes : " + e.loaded);
+			
+			// Unable to compute progress information since the total size is unknown
+		    }
+		    //nb.set_value(e.loaded*1.0);
+		}
+		
+		var op={
+		    host : host,
+		    cmd :  "gloria/get_image",
+		    args: {id : id, type : "jsmat"},
+		    data_mode : "dgm",
+		    xhr :{ type :  "arraybuffer", progress : download_progress }
+		}
+		var rq= new request(op);
+		
+		//nb.set_value(-100);
+		dmon.wait("Starting download");
+		
+		rq.execute(function(error, dgm){
+		    glb.disable(false);
+		    if(error){
+			
+			return dmon.error("FITS data query failed : " + error);
+		    }
+		    //status.append("Downloaded " + data.byteLength + " length " + data.length + "<br/>");
+		    //tpl_item.elements.cnx.elements.bytesread.set_value(data.byteLength);
+		    
+		    dgm.header.gloria=doc_detail_template.data;
+		    tpl_item.trigger("image_data", dgm);
+		    
+		    var img =tmaster.build_template("image"); //for(var u in img) console.log("ip " + u);
+		    //template_ui_builders.image({},img);
+		    create_ui({}, img);
+		    //for(var u in img) console.log("ip " + u);
+		    img.setup_dgram_image(dgm.header,dgm.data);
+		    browser.glm.create_layer(img);
+		    
+		    dmon.done("Image data loaded");
+		    //tpl_item.lay.load_fits_data(data);
+		});
+	    };
+	    
+	    
 	    load_image_data(id);
 	});
-
+	
 	
 	//docview.add_class("hscroll_item");
 	
