@@ -137,7 +137,7 @@ template_ui_builders.gloria_submit=function(ui_opts, submit){
 
     var submit_keys  = submit.elements.keys.elements;
 
-    console.log("submit " + submit.name + " keys " + submit_keys  );
+    //console.log("submit " + submit.name + " keys " + submit_keys  );
     
     submit_keys.telescop.ui_root.add_class("disabled");
     submit_keys.status.ui_root.add_class("disabled");
@@ -155,7 +155,7 @@ template_ui_builders.gloria_submit=function(ui_opts, submit){
 
 template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
-  console.log("gloria DB browser building :  "+tpl_item.name);
+//  console.log("gloria DB browser building :  "+tpl_item.name);
     
     var host = get_server_address() + "/"; // "http://sadira.iasfbo.inaf.it/";
     //var host = "http://localhost/";
@@ -203,7 +203,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 
 	}
 	
-	console.log("New query is " + JSON.stringify(q));
+	//console.log("New query is " + JSON.stringify(q));
 	return q;
     }
 
@@ -449,7 +449,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 	    n_query=data.n;
 	    
 	    position[1]+=request_size;
-	    console.log("Received " + JSON.stringify(data));
+	    //console.log("Received " + JSON.stringify(data));
             //status.append("Received : <pre>" + JSON.stringify(data,null,5) + "</pre><br/>");
 	    var rows=data.data;
 	    for(var i=0;i<rows.length;i++){
