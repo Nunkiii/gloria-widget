@@ -395,7 +395,7 @@ template_ui_builders.image_db_browser=function(ui_opts, tpl_item){
 		    create_ui({}, img);
 		    //for(var u in img) console.log("ip " + u);
 		    img.setup_dgram_image(dgm.header,dgm.data);
-		    browser.glm.create_layer(img);
+		    browser.glm.create_layer(img, 0);
 		    
 		    dmon.done("Image data loaded");
 		    //tpl_item.lay.load_fits_data(data);
